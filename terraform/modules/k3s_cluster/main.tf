@@ -1,5 +1,15 @@
+data "aws_ami" "ubuntu_search" {
+  most_recent = true
+  owners      = ["099720109477"] # המזהה הרשמי של Canonical
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+}
+
 resource "aws_instance" "k3s_node" {
-  ami           = "ami-0c55b159cbfafe1f0" # Ubuntu 22.04 LTS
+  ami           =data.aws_ami.ubuntu_search.id # Ubuntu 22.04 LTS
   instance_type = var.instance_type
 
   vpc_security_group_ids = [aws_security_group.k3s_sg.id]
@@ -13,12 +23,12 @@ resource "aws_instance" "k3s_node" {
               kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
               EOF
 
-  tags = { Name = "QuakeWatch-${var.env_name}" }
+  tags = { Name = "QuakeWatch1-${var.env_name}" }
 }
 
 #  Networking and Security [cite: 195]
 resource "aws_security_group" "k3s_sg" {
-  name = "k3s-sg-${var.env_name}"
+  name = "k3s-sg1-${var.env_name}"
   ingress {
     from_port   = 22
     to_port     = 22
