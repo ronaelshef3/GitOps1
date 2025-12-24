@@ -3,46 +3,39 @@
 This project automates the deployment of the QuakeWatch system using Terraform and AWS. It features a Zero-Cleartext security model, ensuring AWS secrets are never stored on disk in plain text or committed to Git.
 
 ## The Vault Logic
-To protect our infrastructure, we use a hybrid Vault approach:
-1. At Rest: The AWS Secret Key is stored encrypted within the Windows Credential Manager.
-2. In Motion: Secrets are injected directly into the volatile memory (RAM) of the current terminal session.
-3. Verification: Every session start includes a live handshake test with AWS to ensure connectivity.
 
 ---
 
 ## Security Rationale: Identity vs. Secret
-
-The project distinguishes between the AWS Access Key ID and the AWS Secret Access Key for specific security reasons:
-
-### 1. Access Key ID (Public Identity)
-- Storage: Set as a standard System Environment Variable.
-- Risk Level: Low. This is equivalent to a "username." It identifies the account but cannot perform actions on its own.
-- Reason: Keeping it as a system variable allows IDEs and the AWS CLI to identify the context immediately.
-
-### 2. Secret Access Key (Private Signature)
-- Storage: Encrypted within the Windows Credential Manager (Vault).
-- Risk Level: Critical. This is equivalent to a "password." Anyone with this key has full control over the account.
-- Reason: By fetching it only via the Unlock-Vault.ps1 script, we ensure the secret exists only in the Volatile Memory (RAM) of the current terminal session and vanishes when the window is closed.
+To protect our infrastructure, we use a session-based security approach:
+1. **At Rest:** The AWS Secret Key is stored encrypted within the **Windows Credential Manager**.
+2. **In Motion:** Secrets are injected directly into the volatile memory (**RAM**) of the current terminal session.
+3. **Identity Partitioning:** We distinguish between **Public Identity** (Access Key ID) and **Private Signature** (Secret Key) to minimize the attack surface.
 
 ---
 
-## Prerequisites
+## 🛠 Setup Guide (One-Time)
 
-1. Terraform and AWS CLI installed.
-2. BetterCredentials PowerShell module:
-   Install-Module -Name BetterCredentials -Scope CurrentUser -Force
+To prepare your machine for deployment without exposing keys in plain text:
 
----
+### 1. Generate AWS Keys
+- Log in to **AWS Console** -> **IAM** -> **Security Credentials**.
+- Create a new **Access Key** for CLI usage.
 
-## Setup and Usage
+### 2. Run the Secure Setup Script
+Run the `Setup-AWS.ps1` script. It will prompt you for your keys via a masked input and configure the Windows Vault automatically:
+```powershell
+.\Setup-AWS.ps1
 
-### 1. First-Time Setup (Per Machine)
-1. Vault Storage: Add a Generic Credential in Windows Credential Manager:
-   - Internet Address: AWS_SECRET_ACCESS_KEY
-   - Password: Your_AWS_Secret_Access_Key
-2. Public Key: Set your AWS_ACCESS_KEY_ID as a standard System Environment Variable.
+```
 
-### 2. Daily Workflow (In PyCharm)
+### 4  Restart Environment
+Critical: Restart your IDE (PyCharm) or Terminal to ensure Windows 
+refreshes and recognizes the new Environment Variables.
+
+
+
+### 5. Daily Workflow (In PyCharm)
 Every time you open your IDE, run the unified unlock script:
 
 . .\Unlock-Vault.ps1
