@@ -10,3 +10,16 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
+
+# הגדרת ה-Provider של קוברנטיס
+provider "kubernetes" {
+  host     = module.k3s_cluster.public_ip != "" ? "https://${module.k3s_cluster.public_ip}:6443" : "https://localhost"
+  insecure = true
+}
+
+provider "helm" {
+kubernetes ={
+    host     = module.k3s_cluster.public_ip != "" ? "https://${module.k3s_cluster.public_ip}:6443" : "https://localhost"
+    insecure = true
+}
+}

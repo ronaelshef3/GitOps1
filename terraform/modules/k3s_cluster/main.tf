@@ -50,3 +50,6 @@ resource "aws_security_group" "k3s_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# modules/argocd/main.tf
+
