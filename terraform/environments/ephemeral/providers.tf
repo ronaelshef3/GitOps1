@@ -18,8 +18,9 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-kubernetes ={
-    host     = module.k3s_cluster.public_ip != "" ? "https://${module.k3s_cluster.public_ip}:6443" : "https://localhost"
+kubernetes= {
+    host     = module.k3s_cluster.public_ip != "" ? "https://${module.k3s_cluster.public_ip}:6443" : ""
     insecure = true
+    token = var.k3s_token
 }
 }

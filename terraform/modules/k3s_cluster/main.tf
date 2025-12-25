@@ -16,13 +16,16 @@ resource "aws_instance" "k3s_node" {
 
   # Automation to prevent human error during installation [cite: 519]
   user_data = <<-EOF
-              #!/bin/bash
-              curl -sfL https://get.k3s.io | sh -
-              export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-              kubectl create namespace argocd
-              kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-              EOF
+            #!/bin/bash
+            PUBLIC_IP=$(curl -s http://checkip.amazonaws.com)
 
+            curl -sfL https://get.k3s.io | K3S_TOKEN="${var.k3s_token}" sh -s - server \
+            --tls-san $PUBLIC_IP \
+            --write-kubeconfig-mode 644 \
+            --node-external-ip $PUBLIC_IP
+
+
+            EOF
   tags = { Name = "QuakeWatch1-${var.env_name}" }
 }
 
@@ -41,6 +44,12 @@ resource "aws_security_group" "k3s_sg" {
     to_port     = 30007
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 6443
+    to_port     = 6443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # מומלץ להחליף ב-IP שלך ליתר ביטחון
   }
 
   egress {
