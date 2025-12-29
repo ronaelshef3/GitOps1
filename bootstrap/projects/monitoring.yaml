@@ -28,3 +28,9 @@ spec:
     syncOptions:
       - CreateNamespace=true # יצור את ה-Namespace 'monitoring' אוטומטית
       - ServerSideApply=true
+    prometheus:
+      prometheusSpec:
+        # זה יגרום לפרומתאוס לעלות בלי לחכות לדיסק
+        storageSpec:
+          emptyDir:
+            medium: ""
