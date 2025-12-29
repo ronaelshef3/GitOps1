@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://charts.bitnami.com/bitnami'
     chart: redis
-    targetRevision: 18.x.x # גרסת הצ'ארט
+    targetRevision: latest  # גרסת הצ'ארט
     helm:
       valueFiles:
         # כאן ארגו מושך את הקונפיגורציה שלך מהתיקייה שצילמת
