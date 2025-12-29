@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "my-app-chart.name" -}}
+{{- define "quakewatch-chart.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "my-app-chart.fullname" -}}
+{{- define "quakewatch-chart.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "my-app-chart.chart" -}}
+{{- define "quakewatch-chart.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "my-app-chart.labels" -}}
-helm.sh/chart: {{ include "my-app-chart.chart" . }}
-{{ include "my-app-chart.selectorLabels" . }}
+{{- define "quakewatch-chart.labels" -}}
+helm.sh/chart: {{ include "quakewatch-chart.chart" . }}
+{{ include "quakewatch-chart.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "my-app-chart.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "my-app-chart.name" . }}
+{{- define "quakewatch-chart.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "quakewatch-chart.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "my-app-chart.serviceAccountName" -}}
+{{- define "quakewatch-chart.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "my-app-chart.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "quakewatch-chart.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
