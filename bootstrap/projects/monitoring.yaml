@@ -5,6 +5,7 @@ metadata:
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+
 spec:
   project: default
   source:
@@ -26,3 +27,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true # יצור את ה-Namespace 'monitoring' אוטומטית
+      - ServerSideApply=true
