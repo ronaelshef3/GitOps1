@@ -15,7 +15,8 @@ spec:
     helm:
       # כאן הקסם: אנחנו אומרים לו לקחת את ההגדרות מהגיט שלך
       valueFiles:
-        - "https://github.com/ronaelshef3/GITops1/infrastructure/monitoring/values.yaml"
+#        - "https://github.com/ronaelshef3/GITops1/infrastructure/monitoring/values.yaml"
+        - "https://raw.githubusercontent.com/ronaelshef3/GitOps1/main/infrastructure/monitoring/values.yaml"
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring # כדאי להפריד ל-Namespace משלו
