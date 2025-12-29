@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "quakewatch-chart.fullname" . }}
   labels:
-    {{- include "quakewatch-chart.labels" . | nindent 4 }}
+    {{- include "my-app-chart.labels" . | nindent 4 }}
   annotations: # <--- זה המקום הנכון!
     prometheus.io/scrape: "true"
     prometheus.io/port: "5000"
