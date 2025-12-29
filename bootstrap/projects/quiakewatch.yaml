@@ -20,7 +20,7 @@ spec:
   # Where to get the YAML files from
 
   source:
-    repoURL: 'https://github.com/ronaelshef3/GITops'
+    repoURL: 'https://github.com/ronaelshef3/GITops1'
     # עדכן את הנתיב לתיקייה הספציפית של ה-Chart
     path: 'app-manifests/quakewatch-chart'
     targetRevision: HEAD
