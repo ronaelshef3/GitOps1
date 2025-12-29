@@ -5,32 +5,34 @@ metadata:
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
-
 spec:
   project: default
   source:
-    # המקור הוא ה-Chart הרשמי של הקהילה
     repoURL: 'https://prometheus-community.github.io/helm-charts'
     chart: kube-prometheus-stack
-    targetRevision: 61.x.x # גרסה יציבה
+    targetRevision: 61.x.x
     helm:
-      # כאן הקסם: אנחנו אומרים לו לקחת את ההגדרות מהגיט שלך
       valueFiles:
-#        - "https://github.com/ronaelshef3/GITops1/infrastructure/monitoring/values.yaml"
         - "https://raw.githubusercontent.com/ronaelshef3/GitOps1/master/infrastructure/monitoring/values.yaml"
+      # כאן הוספנו את ההגדרות שחיוביות ל-Localhost
+      values: |
+        prometheus:
+          prometheusSpec:
+            storageSpec:
+              emptyDir:
+                medium: ""
+            resources:
+              requests:
+                memory: "400Mi"
+              limits:
+                memory: "800Mi"
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: monitoring # כדאי להפריד ל-Namespace משלו
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true # יצור את ה-Namespace 'monitoring' אוטומטית
+      - CreateNamespace=true
       - ServerSideApply=true
-    prometheus:
-      prometheusSpec:
-        # זה יגרום לפרומתאוס לעלות בלי לחכות לדיסק
-        storageSpec:
-          emptyDir:
-            medium: ""
