@@ -23,6 +23,7 @@ spec:
     repoURL: 'https://github.com/ronaelshef3/GitOps1.git'
     # עדכן את הנתיב לתיקייה הספציפית של ה-Chart
     path: 'app-manifests/quakewatch-chart'
+
     targetRevision: master
 
     # --- הסעיף החשוב ---
