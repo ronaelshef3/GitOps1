@@ -7,7 +7,7 @@ metadata:
   labels:
     # ה-Label הזה מוגדר ב-kube-prometheus-stack כברירת מחדל.
     # הוא אומר ל-Operator "תיקח אותי!"
-    release: prometheus-stack
+    release: monitoring-stack
     {{- include "quakewatch-chart.labels" . | nindent 4 }}
 spec:
   selector:
