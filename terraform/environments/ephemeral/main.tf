@@ -1,23 +1,48 @@
-# 1. הקמת השרת (EC2 + K3s)
+# ---------------------
+# 1️⃣ יצירת EC2 + K3s
+# ---------------------
 module "k3s_cluster" {
   source        = "../../modules/k3s_cluster"
-  aws_region    = "us-east-1"
-  env_name      = "ephemeral"
-  instance_type = "t3.small"
-  k3s_token = var.k3s_token
-
+  aws_region    = var.aws_region
+  env_name      = var.env_name
+  instance_type = var.instance_type
+  key_name      = var.key_name
+  k3s_token     = var.k3s_token
 }
 
-# 2. התקנת ArgoCD (דרך Helm)
+resource "time_sleep" "wait_for_k3s" {
+  depends_on      = [module.k3s_cluster]
+  create_duration = "120s"
+}
+
+# ---------------------
+# 2️⃣ יצירת Secrets
+# ---------------------
+resource "kubernetes_secret" "database_credentials" {
+  # depends_on = [module.k3s_cluster]
+  provider = kubernetes.main
+  metadata {
+    name      = "aws-secret"
+    namespace = "default"
+  }
+  data = {
+    username = "admin"
+    password = var.aws_pass
+  }
+  type       = "Opaque"
+  depends_on = [time_sleep.wait_for_k3s]
+}
+
+# ---------------------
+# 3️⃣ התקנת ArgoCD דרך Helm
+# ---------------------
 module "argocd_install" {
-  source     = "../../modules/argocd"
-  depends_on = [module.k3s_cluster]
+  source       = "../../modules/argocd"
+  depends_on   = [time_sleep.wait_for_k3s,module.k3s_cluster]
+  # depends_on = []
+  k3s_node_id  = module.k3s_cluster.k3s_node_id
+}
 
-  k3s_node_id = module.k3s_cluster.k3s_node_id
-  # אם המודול argocd מכיר את המשתנה host, שים אותו כאן בלי גרשיים:
-  # host = module.k3s_cluster.public_ip
-}
-# 3. הדפסת ה-IP של השרת בסיום
-output "server_ip" {
-  value = module.k3s_cluster.public_ip
-}
+# ---------------------
+# 4️⃣ Outputs
+# ---------------------

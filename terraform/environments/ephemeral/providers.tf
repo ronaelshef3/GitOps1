@@ -4,23 +4,49 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.0"
+    }
   }
 }
 
+# AWS Provider
 provider "aws" {
   region = var.aws_region
 }
 
-# הגדרת ה-Provider של קוברנטיס
+# Kubernetes Providers
 provider "kubernetes" {
-  host     = module.k3s_cluster.public_ip != "" ? "https://${module.k3s_cluster.public_ip}:6443" : "https://localhost"
-  insecure = true
+  alias                  = "bootstrap"
+  host                   = "https://${module.k3s_cluster.public_ip}:6443"
+  cluster_ca_certificate = base64decode(var.k3s_ca_cert)
+  client_certificate     = base64decode(var.k3s_client_cert)
+  client_key             = base64decode(var.k3s_client_key)
+  # depends_on = [module.k3s_cluster]
+
 }
 
-provider "helm" {
-kubernetes= {
-    host     = module.k3s_cluster.public_ip != "" ? "https://${module.k3s_cluster.public_ip}:6443" : ""
-    insecure = true
-    token = var.k3s_token
+provider "kubernetes" {
+  alias    = "main"
+  host     = "https://${module.k3s_cluster.public_ip}:6443"
+  token    = var.k3s_token
+  insecure = true
+  # depends_on = [module.k3s_cluster]
+
 }
+
+# Helm Provider
+provider "helm" {
+  kubernetes {
+    host     = "https://${module.k3s_cluster.public_ip}:6443"
+    token    = var.k3s_token
+    insecure = true
+    # depends_on = [module.k3s_cluster]
+
+  }
 }

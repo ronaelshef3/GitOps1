@@ -17,3 +17,10 @@ resource "helm_release" "argocd" {
     })
   ]
 }
+data "kubernetes_secret" "argocd_admin_password" {
+  depends_on = [helm_release.argocd]
+  metadata {
+    name      = "argocd-initial-admin-secret"
+    namespace = "argocd"
+  }
+}
