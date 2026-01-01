@@ -33,7 +33,7 @@ resource "aws_instance" "k3s_node" {
       Name = "K3s-${var.env_name}"
       KeyPath = var.private_key_path
    }
-}
+
 
 
 resource "aws_security_group" "k3s_sg" {
