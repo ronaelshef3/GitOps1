@@ -25,19 +25,19 @@ resource "aws_instance" "k3s_node" {
     when    = destroy
     command = <<EOT
       mkdir -p ../../local_backups/logs
-      scp -o StrictHostKeyChecking=no -i ${var.private_key_path} ubuntu@${self.public_ip}:/var/log/syslog ../../local_backups/logs/syslog.log
+      scp -o StrictHostKeyChecking=no -i ${self.tags.KeyPath} ubuntu@${self.public_ip}:/var/log/syslog ../../local_backups/logs/syslog.log
     EOT
 
   }
   tags = {
-      Name = "K3s-${var.env_name}"
-      KeyPath = var.private_key_path
-   }
+    Name    = "K3s-${var.env_name}"
+    KeyPath = var.private_key_path
+  }
 
-
+}
 
 resource "aws_security_group" "k3s_sg" {
-  name = "k3s-sg-${var.env_name}"
+  name = "k3s-sg1-${var.env_name}"
   ingress {
     from_port = 22
     to_port   = 22
@@ -65,5 +65,5 @@ resource "aws_security_group" "k3s_sg" {
 }
 
 data "http" "my_ip" {
-  url = "https://ifconfig.me/ip"
+  url = "https://ipv4.icanhazip.com"
 }
