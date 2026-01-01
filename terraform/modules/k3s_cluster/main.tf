@@ -21,7 +21,12 @@ resource "aws_instance" "k3s_node" {
     systemctl enable k3s
     systemctl start k3s
   EOF
-
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<EOT
+      mkdir -p ../../local_backups/logs
+      scp -o StrictHostKeyChecking=no -i ${var.private_key_path} ubuntu@${self.public_ip}:/var/log/syslog ../../local_backups/logs/syslog.log
+    EOT
   tags = { Name = "K3s-${var.env_name}" }
 }
 
@@ -43,7 +48,7 @@ resource "aws_security_group" "k3s_sg" {
     from_port   = 30007
     to_port     = 30007
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.body)}/32"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
   egress {
     from_port   = 0
@@ -54,5 +59,5 @@ resource "aws_security_group" "k3s_sg" {
 }
 
 data "http" "my_ip" {
-  url = "https://ifconfig.me"
+  url = "https://ifconfig.me/ip"
 }

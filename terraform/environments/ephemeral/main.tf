@@ -8,6 +8,7 @@ module "k3s_cluster" {
   instance_type = var.instance_type
   key_name      = var.key_name
   k3s_token     = var.k3s_token
+  private_key_path = var.private_key_path
 }
 
 resource "time_sleep" "wait_for_k3s" {

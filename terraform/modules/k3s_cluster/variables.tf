@@ -8,3 +8,7 @@ variable "k3s_token" {
   sensitive = true
 }
 variable "key_name" {type = string}
+variable "private_key_path" {
+  type        = string
+  description = "Path to the private key file (.pem) on your local machine"
+}

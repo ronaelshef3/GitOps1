@@ -48,3 +48,7 @@ variable "key_name" {
   description = "EC2 Key Pair name to use"
   default     = "DevOps1808"
 }
+variable "private_key_path" {
+  type        = string
+  description = "הנתיב לקובץ המפתח הפרטי במחשב שלך"
+}
