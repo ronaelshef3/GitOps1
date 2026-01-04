@@ -12,3 +12,7 @@ variable "private_key_path" {
   type        = string
   description = "Path to the private key file (.pem) on your local machine"
 }
+# variable "env_name" {
+#   type        = string
+#   description = ""
+# }
