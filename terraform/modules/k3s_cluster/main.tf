@@ -23,10 +23,11 @@ resource "aws_instance" "k3s_node" {
   EOF
   provisioner "local-exec" {
     when    = destroy
+    interpreter = ["PowerShell", "-Command"]
     command = <<EOT
-      mkdir -p ../../local_backups/logs
-      scp -o StrictHostKeyChecking=no -i ${self.tags.KeyPath} ubuntu@${self.public_ip}:/var/log/syslog ../../local_backups/logs/syslog.log
-    EOT
+    # if (!(Test-Path "../../local_backups/logs")) { New-Item -ItemType Directory -Path "../../local_backups/logs" -Force }
+    # scp -o StrictHostKeyChecking=no -i C:/Users/USER/DevOps1808.pem ubuntu@${self.public_ip}:/var/log/syslog ../../local_backups/logs/syslog.log
+  EOT
 
   }
   tags = {
@@ -42,19 +43,19 @@ resource "aws_security_group" "k3s_sg" {
     from_port = 22
     to_port   = 22
     protocol  = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.body)}/32"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }# חור מאובטח רק אליך!  }
   ingress {
     from_port   = 6443
     to_port     = 6443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks =  ["0.0.0.0/0"]
   }
   ingress {
     from_port   = 30007
     to_port     = 30007
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
+    cidr_blocks =  ["0.0.0.0/0"]
   }
   egress {
     from_port   = 0

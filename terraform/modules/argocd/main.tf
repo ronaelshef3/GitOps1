@@ -11,16 +11,16 @@ resource "helm_release" "argocd" {
       server = {
         service = {
           type     = "NodePort"
-          nodePort = 30007
+          nodePort = sudo k3s kubectl get pods -n argocd
         }
       }
     })
   ]
 }
-data "kubernetes_secret" "argocd_admin_password" {
-  depends_on = [helm_release.argocd]
-  metadata {
-    name      = "argocd-initial-admin-secret"
-    namespace = "argocd"
-  }
-}
+# data "kubernetes_secret" "argocd_admin_password" {
+#   depends_on = [helm_release.argocd]
+#   metadata {
+#     name      = "argocd-initial-admin-secret"
+#     namespace = "argocd"
+#   }
+# }
