@@ -1,0 +1,16 @@
+# --- הוסף את הקטע הזה בסוף הקובץ values.yaml ---
+
+loki:
+  enabled: true
+  url: <כתובת ה-LOKI_URL_HERE שקיבלת מ-Grafana Cloud>
+
+promtail:
+  enabled: true
+  config:
+    clients:
+      - url: <כתובת ה-LOKI_URL_HERE שקיבלת מ-Grafana Cloud>/api/v1/push
+        tenant_id: <ה-User ID שלך>
+        basicauth:
+          username: <ה-User ID שלך>
+          password: <מפתח ה-API הסודי>
+    # כאן ניתן להוסיף הגדרות נוספות לאיזה לוגים לאסוף ומאיפה

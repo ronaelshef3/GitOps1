@@ -1,20 +1,63 @@
-terraform {
-  required_version = ">= 1.0.0" # Ensure that the Terraform version is 1.0.0 or higher
+resource "aws_security_group" "k3s_sg" {
+  vpc_id      = var.vpc_id
+  name        = "sg_k3s_${var.env_name}"
+  description = "Security group for K3s cluster with Ingress support"
 
-  required_providers {
-    aws = {
-      source = "hashicorp/aws" # Specify the source of the AWS provider
-      version = "~> 4.0"        # Use a version of the AWS provider that is compatible with version
-    }
+  # ---  (Ingress) ---
+
+  # 1.  (HTTP)
+  #
+  # -Ingress Controller
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
-}
 
-provider "aws" {
-  region = "us-east-1" # Set the AWS region to US East (N. Virginia)
-}
+  # 2. (HTTPS)
+  #  SSL
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-resource "aws_instance" "aws_example" {
+  # 3. ArgoCD UI (NodePort)
+  #
+  ingress {
+    from_port   = 30080
+    to_port     = 30080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # 4.
+  #
+  ingress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = true
+  }
+
+  # ---(Egress) ---
+
+  # DockerHub -S3
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
-    Name = "ExampleInstance" # Tag the instance with a Name tag for easier identification
+    Name = "sg-k3s-${var.env_name}"
   }
+}
+
+output "k3s_sg_id" {
+  value       = aws_security_group.k3s_sg.id
+  description = "The ID of the security group for use in the compute module"
 }

@@ -1,5 +1,9 @@
-variable "instance_type" {
-  type = string                     # The type of the variable, in this case a string
-  default = "t2.micro"                 # Default value for the variable
-  description = "The type of EC2 instance" # Description of what this variable represents
-}
+variable "env_name" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
+variable "sg_id" {}
+variable "instance_type" {}
+variable "key_name" {}
+variable "ami_id" {}
+variable "loki_user" {}
+variable "grafana_token" {}
