@@ -7,3 +7,4 @@ variable "key_name" {}
 variable "ami_id" {}
 variable "loki_user" {}
 variable "grafana_token" {}
+variable "loki_url" {}
