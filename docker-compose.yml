@@ -1,0 +1,28 @@
+services:
+  debug-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    container_name: debug-server
+    privileged: true
+    deploy:
+      resources:
+        limits:
+          memory: 8G # הקצאה מה-32GB שלך
+        reservations:
+          memory: 2G
+    ports:
+      - "2222:22"          # SSH
+      - "6443:6443"        # K8s API
+      - "30007:30007"      # ArgoCD UI
+      - "30080:30080"      # App UI
+      - "32000:32000"      # Grafana
+      - "30379:30379"      # Redis
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ./setup:/tmp/setup
+      - k3s-data:/var/lib/rancher/k3s
+    restart: unless-stopped
+
+volumes:
+  k3s-data:
