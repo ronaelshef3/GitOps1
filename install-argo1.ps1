@@ -36,19 +36,19 @@ while ($retries -lt 30) {
 # 3. System Prep - Running external script
 Write-Host "`n=== STEP 3: Running External System Prep ===" -ForegroundColor Cyan
 # העלאה והרצה של הסקריפט הקיים בתיקיית השורש שלך
-scp -i $SSH_KEY -o StrictHostKeyChecking=accept-new "./system-prep.sh" "${REMOTE}:/tmp/system-prep.sh"
+scp -i $SSH_KEY -o StrictHostKeyChecking=accept-new "setup\system-prep.sh" "${REMOTE}:/tmp/system-prep.sh"
 ssh -i $SSH_KEY -t $REMOTE "chmod +x /tmp/system-prep.sh && sudo /tmp/system-prep.sh"
 
 # 4. Install ArgoCD - Running external script
 Write-Host "`n=== STEP 4: Running External Argo Install ===" -ForegroundColor Cyan
-scp -i $SSH_KEY -o StrictHostKeyChecking=accept-new "./install-argo.sh" "${REMOTE}:/tmp/install-argo.sh"
+scp -i $SSH_KEY -o StrictHostKeyChecking=accept-new "setup\install-argo.sh" "${REMOTE}:/tmp/install-argo.sh"
 ssh -i $SSH_KEY -t $REMOTE "chmod +x /tmp/install-argo.sh && sudo /tmp/install-argo.sh"
 
 # 5. Deploy Root App (REFERENCING GIT - No Hardcoded YAML)
 Write-Host "`n=== STEP 5: Deploying Root App from Git Reference ===" -ForegroundColor Cyan
 # במקום לייצר YAML, אנחנו פשוט אומרים לקיוב להחיל את הקובץ שקיים בתיקיית ה-bootstrap בגיט
 # אנחנו משתמשים בנתיב ה-Raw של גיטהאב כדי שהשרת יוכל למשוך אותו ישירות
-$ROOT_APP_URL = "https://raw.githubusercontent.com/ronaelshef3/GitOps1/main/bootstrap/root-app.yaml"
+$ROOT_APP_URL = "https://raw.githubusercontent.com/ronaelshef3/GitOps1/master/bootstrap/root-app.yaml"
 
 ssh -i $SSH_KEY -t $REMOTE "kubectl apply -f $ROOT_APP_URL"
 
@@ -59,4 +59,16 @@ Write-Host "  ArgoCD UI: http://$IP:30007" -ForegroundColor Yellow
 Write-Host "  Check ArgoCD for sync status of Root App" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Green
 
+Start-Process "http://$IP:30007"
+
+# 7. Final Info & Success Summary
+Write-Host "`n========================================" -ForegroundColor Green
+Write-Host "    DEPLOYMENT SUCCESSFUL!" -ForegroundColor Green
+Write-Host "  ArgoCD UI: http://$IP:30007" -ForegroundColor Yellow
+Write-Host "  Username:  admin" -ForegroundColor Yellow
+Write-Host "  Password:  $ARGO_PASS" -ForegroundColor White -BackgroundColor DarkBlue
+Write-Host "  Check ArgoCD for sync status of Root App" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Green
+
+# פתיחת הדפדפן אוטומטית לכתובת השרת בפורט המוגדר
 Start-Process "http://$IP:30007"
