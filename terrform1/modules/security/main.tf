@@ -23,12 +23,25 @@ resource "aws_security_group" "k3s_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # מאפשר לכל העולם (לצורך הניסוי)
+  }
+# K3s API - אם תרצה להריץ kubectl מהמחשב האישי
+  ingress {
+    from_port   = 6443
+    to_port     = 6443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   # 3. ArgoCD UI (NodePort)
   #
+  # ArgoCD UI (NodePort) - חייב להיות תואם לסקריפט ה-Bash!
   ingress {
-    from_port   = 30080
-    to_port     = 30080
+    from_port   = 30007
+    to_port     = 30007
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

@@ -8,3 +8,7 @@ variable "ami_id" {}
 variable "loki_user" {}
 variable "grafana_token" {}
 variable "loki_url" {}
+variable "s3_bucket_name" {
+  type        = string
+  description = "The name of the existing S3 bucket"
+}

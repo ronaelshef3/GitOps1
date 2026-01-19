@@ -15,11 +15,15 @@ resource "aws_instance" "k3s_node" {
 
   user_data = <<-EOF
     #!/bin/bash
+    # 1. הגדרת טוקן קבוע (מהמשתנים שלך)
     mkdir -p /etc/rancher/k3s
     echo "${var.k3s_token}" > /etc/rancher/k3s/cluster-token
-    curl -sfL https://get.k3s.io | K3S_TOKEN="${var.k3s_token}" sh -s - server --write-kubeconfig-mode 644 --disable traefik
-    systemctl enable k3s
-    systemctl start k3s
+
+    # 2. install  K3s
+    # שים לב ל-write-kubeconfig-mode - זה קריטי כדי שה-PS1 יוכל למשוך את הקובץ
+    curl -sfL https://get.k3s.io | K3S_TOKEN="${var.k3s_token}" sh -s - server \
+      --write-kubeconfig-mode 644 \
+      --disable traefik
   EOF
   provisioner "local-exec" {
     when    = destroy
