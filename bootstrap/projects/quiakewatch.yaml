@@ -53,3 +53,4 @@ spec:
     # (Optional) Allows Argo to create the destination namespace if it doesn't exist
     syncOptions:
     - CreateNamespace=true
+    - ServerSideApply=true

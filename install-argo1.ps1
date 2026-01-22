@@ -61,14 +61,20 @@ Write-Host "========================================" -ForegroundColor Green
 
 Start-Process "http://$IP:30007"
 
-# 7. Final Info & Success Summary
+# 6. שליפת הסיסמה מהשרת (חובה לבצע לפני ההדפסה)
+Write-Host "`n=== STEP 6: Retrieving ArgoCD Password ===" -ForegroundColor Cyan
+$ARGO_PASS = ssh -i $SSH_KEY -q $REMOTE "sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
+
+# 7. הדפסה סופית עם המשתנים
 Write-Host "`n========================================" -ForegroundColor Green
 Write-Host "    DEPLOYMENT SUCCESSFUL!" -ForegroundColor Green
-Write-Host "  ArgoCD UI: http://$IP:30007" -ForegroundColor Yellow
+Write-Host "  ArgoCD UI: http://${IP}:30007" -ForegroundColor Yellow
 Write-Host "  Username:  admin" -ForegroundColor Yellow
 Write-Host "  Password:  $ARGO_PASS" -ForegroundColor White -BackgroundColor DarkBlue
 Write-Host "  Check ArgoCD for sync status of Root App" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Green
 
-# פתיחת הדפדפן אוטומטית לכתובת השרת בפורט המוגדר
-Start-Process "http://$IP:30007"
+# פתיחה אוטומטית של הדפדפן
+if ($IP) {
+    Start-Process "http://${IP}:30007"
+}

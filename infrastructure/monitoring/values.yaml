@@ -1,16 +1,32 @@
-# --- הוסף את הקטע הזה בסוף הקובץ values.yaml ---
-
-loki:
+prometheusOperator:
   enabled: true
-  url: <כתובת ה-LOKI_URL_HERE שקיבלת מ-Grafana Cloud>
+  admissionWebhooks:
+    enabled: false # זה הכי חשוב! מונע את השגיאה שראינו
 
-promtail:
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    retention: 1d # שמירת נתונים ליום אחד בלבד
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+grafana:
   enabled: true
-  config:
-    clients:
-      - url: <כתובת ה-LOKI_URL_HERE שקיבלת מ-Grafana Cloud>/api/v1/push
-        tenant_id: <ה-User ID שלך>
-        basicauth:
-          username: <ה-User ID שלך>
-          password: <מפתח ה-API הסודי>
-    # כאן ניתן להוסיף הגדרות נוספות לאיזה לוגים לאסוף ומאיפה
+  adminPassword: admin # סיסמה פשוטה לכניסה
+  persistence:
+    enabled: false # לא שומר דאשבורדים אחרי מחיקה (חוסך מקום)
+
+# מכבים את כל ה"רעש" מסביב שלא דחוף כרגע
+alertmanager:
+  enabled: false
+nodeExporter:
+  enabled: false
+kubeStateMetrics:
+  enabled: true # זה חשוב כדי לראות את הסטטוס של האפליקציה שלך
+kubeProxy:
+  enabled: false

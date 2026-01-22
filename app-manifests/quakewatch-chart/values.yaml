@@ -11,7 +11,7 @@ command:
 replicaCount: 1
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: aharonshefer03/quakewatch
+  repository: aharonshefer03/quakewatch1
   tag: "v0.28"
   # This sets the pull policy for images.
   pullPolicy: Always
@@ -115,8 +115,8 @@ httpRoute:
             #       value: v2
 resources:
   limits:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 400m
+    memory: 500Mi
   requests:
     cpu: 100m
     memory: 128Mi
@@ -135,11 +135,15 @@ resources:
 livenessProbe:
   httpGet:
     path: /
-    port: http
+    port: 5000
+  initialDelaySeconds: 45
+  periodSeconds: 10
 readinessProbe:
   httpGet:
     path: /
-    port: http
+    port: 5000
+  initialDelaySeconds: 45
+  periodSeconds: 10
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
   enabled: false
