@@ -23,9 +23,20 @@ spec:
                 medium: ""
             resources:
               requests:
+                cpu: "100m"
                 memory: "400Mi"
               limits:
+                cpu: "500m"
                 memory: "800Mi"
+        alertmanager:
+          enabled: false
+        grafana:
+          enabled: true
+        prometheusOperator:
+          admissionWebhooks:
+            enabled: false #
+            patch:
+              enabled: false
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
