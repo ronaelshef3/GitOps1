@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: monitoring-stack
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -14,7 +12,6 @@ spec:
     helm:
       valueFiles:
         - "https://raw.githubusercontent.com/ronaelshef3/GitOps1/master/infrastructure/monitoring/values.yaml"
-      # כאן הוספנו את ההגדרות שחיוביות ל-Localhost
       values: |
         prometheus:
           prometheusSpec:
@@ -34,7 +31,7 @@ spec:
           enabled: true
         prometheusOperator:
           admissionWebhooks:
-            enabled: false #
+            enabled: false
             patch:
               enabled: false
           tls:
@@ -48,5 +45,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-      - Validate=false
+      - ServerSideApply=true  # זה התיקון האמיתי - קוברנטיס מנהל את ה-Diff
