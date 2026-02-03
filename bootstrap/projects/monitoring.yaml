@@ -45,4 +45,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true  # זה התיקון האמיתי - קוברנטיס מנהל את ה-Diff
+      - ServerSideApply=true
+      - Validate=false      # מתעלם משגיאות Schema ב-Cache של ArgoCD
+      - Replace=true        # מאפשר החלפת משאבים אם ה-Patch נכשל
+      - SkipDryRunOnMissingResource=true
