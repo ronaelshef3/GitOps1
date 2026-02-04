@@ -38,7 +38,7 @@ refreshes and recognizes the new Environment Variables.
 ### 5. Daily Workflow (In PyCharm)
 Every time you open your IDE, run the unified unlock script:
 
-. .\Unlock-Vault.ps1
+. .\Unlock-AWS.ps1
 
 The script will:
 - Extract Secret Key from Vault.
@@ -50,11 +50,12 @@ The script will:
 ## Project Structure and Deployment
 
 ### Directory Layout
-- /terraform: Infrastructure as Code (VPC, EC2, Security Groups).
-- /helm: Kubernetes deployment charts.
-  - /app-chart: Main application manifests.
-  - /infrastructure-chart: Supporting services (Redis, DB).
-- /k8s: ArgoCD Application manifests (GitOps).
+- /terrform1: Infrastructure as Code (Modularized with modules and environments).
+- /app-manifests: Kubernetes deployment charts.
+  - /quakewatch-chart: Main application Helm chart.
+- /infrastructure: Supporting services.
+  - /redis: Redis configuration.
+  - /monitoring: Monitoring stack.
 
 ### Helm Values Management
 We use a layered Values approach:
@@ -67,25 +68,25 @@ We use a layered Values approach:
 ## TODO List for Implementation
 
 ### Infrastructure (Terraform)
-- [ ] TODO: Define VPC and Subnet structure in main.tf.
+- [ ] TODO: Define VPC and Subnet structure in modules.
 - [ ] TODO: Configure EC2 instance type and AMI ID.
 - [ ] 
 - [ ] TODO: Add Security Group rules for Port 80, 22, and ArgoCD (30007).
 
 ### Application Deployment (Helm)
-- [ ] TODO: Define resource limits (CPU/Memory) in app-chart/values.yaml.
+- [ ] TODO: Define resource limits (CPU/Memory) in quakewatch-chart/values.yaml.
 - [ ] TODO: Map environment variables for Database and Redis connections.
 - [ ] 
 
 ### GitOps (ArgoCD)
-- [ ] TODO: Define the Application manifest in /k8s to track the /helm directory.
+- [ ] TODO: Define the Application manifest to track the /app-manifests directory.
 - [ ] TODO: Set up automated sync policy in ArgoCD.
 
 ---
 
 ## Deployment Flow
-1. Run . .\Unlock-Vault.ps1
-2. cd terraform
+1. Run . .\Unlock-AWS.ps1
+2. cd terrform1
 3. terraform apply
 4. TODO: Verify Kubernetes node status (kubectl get nodes).
 5. TODO: Access ArgoCD UI to monitor application sync.
