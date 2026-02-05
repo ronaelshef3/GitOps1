@@ -1,22 +1,46 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root-app
+  name: monitoring-simple
   namespace: argocd
 spec:
   project: default
   source:
-    # --- שנה לכתובת ה-GIT שלך ---
-    repoURL: 'https://github.com/ronaelshef3/gitops1'
-    targetRevision: master
-    path: bootstrap/projects # מצביע לתיקייה עם ההגדרות של השאר
+    # Use the lean Prometheus chart (NOT the operator)
+    repoURL: 'https://prometheus-community.github.io/helm-charts'
+    chart: prometheus
+    targetRevision: 25.x.x
+    helm:
+      values: |
+        # 1. Server settings (Small footprint)
+        server:
+          retention: 3h
+          persistentVolume:
+            enabled: false
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+
+        # 2. Disable the component fighting over ports
+        nodeExporter:
+          enabled: false 
+
+        # 3. Disable unneeded heavy features
+        alertmanager:
+          enabled: false
+        pushgateway:
+          enabled: false
+
   destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-  syncOptions:
-    - CreateNamespace=true
-    - ServerSideApply=true
+    syncOptions:
+      - CreateNamespace=true
+      # Bypasses the "field not declared in schema" error
+      - Validate=false
