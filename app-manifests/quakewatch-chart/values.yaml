@@ -60,7 +60,7 @@ service:
   port: 5000
   # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
   targetPort: 5000 # הפורט בתוך הפוד
-  nodePort: 30080
+  nodePort: 30081
 ingress:
   enabled: false
   className: ""
