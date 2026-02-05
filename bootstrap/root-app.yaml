@@ -1,18 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring-simple
+  name: universal-monitoring
   namespace: argocd
 spec:
   project: default
   source:
-    # Use the lean Prometheus chart (NOT the operator)
     repoURL: 'https://prometheus-community.github.io/helm-charts'
     chart: prometheus
     targetRevision: 25.x.x
     helm:
       values: |
-        # 1. Server settings (Small footprint)
         server:
           retention: 3h
           persistentVolume:
@@ -21,12 +19,18 @@ spec:
             requests:
               cpu: "100m"
               memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
 
-        # 2. Disable the component fighting over ports
         nodeExporter:
-          enabled: false 
+          enabled: true
+          hostNetwork: false
+          hostPID: false
+          service:
+            type: ClusterIP
+            hostPort: 0 
 
-        # 3. Disable unneeded heavy features
         alertmanager:
           enabled: false
         pushgateway:
@@ -42,5 +46,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      # Bypasses the "field not declared in schema" error
       - Validate=false
