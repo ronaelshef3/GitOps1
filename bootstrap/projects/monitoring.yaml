@@ -11,10 +11,8 @@ spec:
     targetRevision: 25.x.x
     helm:
       values: |
-        # English: Server configuration for low-resource environments (Docker/K3S)
         server:
           retention: 3h
-          # Disable Persistent Volumes to work on both Docker (no PVC) and K3S (EBS/LocalPath)
           persistentVolume:
             enabled: false
           resources:
@@ -25,14 +23,14 @@ spec:
               cpu: "300m"
               memory: "512Mi"
 
-        # English: Node Exporter setup that won't crash on port conflicts
         nodeExporter:
           enabled: true
-          # hostNetwork: false ensures it works even if port 9100 is taken on the Host
           hostNetwork: false
           hostPID: false
+          service:
+            type: ClusterIP
+            hostPort: 0 
 
-        # English: Disable heavy Enterprise features
         alertmanager:
           enabled: false
         pushgateway:
@@ -48,4 +46,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - Validate=false # English: Critical to bypass the "field not declared in schema" error
+      - Validate=false
