@@ -1,30 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minimal-monitoring
+  name: universal-monitoring
   namespace: argocd
 spec:
   project: default
   source:
-    # Using the standard Prometheus chart (not the Operator stack)
     repoURL: 'https://prometheus-community.github.io/helm-charts'
     chart: prometheus
     targetRevision: 25.x.x
     helm:
       values: |
-        # Disable components you don't need for a "light" version
-        alertmanager:
-          enabled: false
-        pushgateway:
-          enabled: false
-        
+        # English: Server configuration for low-resource environments (Docker/K3S)
         server:
-          # Keep only 6 hours of data to save memory/CPU
-          retention: 6h
-          # Disable Persistent Volumes to avoid storage issues
+          retention: 3h
+          # Disable Persistent Volumes to work on both Docker (no PVC) and K3S (EBS/LocalPath)
           persistentVolume:
             enabled: false
-          # Resource requests for a lean footprint
           resources:
             requests:
               cpu: "100m"
@@ -32,13 +24,19 @@ spec:
             limits:
               cpu: "300m"
               memory: "512Mi"
-          # Service configuration
-          service:
-            type: ClusterIP
 
-        # Scrape metrics from nodes (CPU, RAM, etc.)
+        # English: Node Exporter setup that won't crash on port conflicts
         nodeExporter:
           enabled: true
+          # hostNetwork: false ensures it works even if port 9100 is taken on the Host
+          hostNetwork: false
+          hostPID: false
+
+        # English: Disable heavy Enterprise features
+        alertmanager:
+          enabled: false
+        pushgateway:
+          enabled: false
 
   destination:
     server: 'https://kubernetes.default.svc'
@@ -50,5 +48,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      # Skips schema validation during the diff phase to prevent the "field not declared" error
-      - Validate=false
+      - Validate=false # English: Critical to bypass the "field not declared in schema" error
