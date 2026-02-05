@@ -60,7 +60,7 @@ service:
   port: 5000
   # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
   targetPort: 5000 # הפורט בתוך הפוד
-  nodePort: 30081
+  nodePort: 30085
 ingress:
   enabled: false
   className: ""
@@ -115,11 +115,11 @@ httpRoute:
             #       value: v2
 resources:
   limits:
-    cpu: 400m
-    memory: 500Mi
+    cpu: 200m
+    memory: 256500Mi
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 50m
+    memory: 64Mi
 # We usually recommend not to specify default resources and to leave this as a conscious
 # choice for the user. This also increases chances charts run on environments with little
 # resources, such as Minikube. If you do want to specify resources, uncomment the following
