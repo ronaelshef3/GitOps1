@@ -1,51 +1,54 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring-stack
+  name: minimal-monitoring
   namespace: argocd
 spec:
   project: default
   source:
+    # Using the standard Prometheus chart (not the Operator stack)
     repoURL: 'https://prometheus-community.github.io/helm-charts'
-    chart: kube-prometheus-stack
-    targetRevision: 61.x.x
+    chart: prometheus
+    targetRevision: 25.x.x
     helm:
-      valueFiles:
-        - "https://raw.githubusercontent.com/ronaelshef3/GitOps1/master/infrastructure/monitoring/values.yaml"
       values: |
-        prometheus:
-          prometheusSpec:
-            storageSpec:
-              emptyDir:
-                medium: ""
-            resources:
-              requests:
-                cpu: "100m"
-                memory: "400Mi"
-              limits:
-                cpu: "500m"
-                memory: "800Mi"
+        # Disable components you don't need for a "light" version
         alertmanager:
           enabled: false
-        grafana:
+        pushgateway:
+          enabled: false
+        
+        server:
+          # Keep only 6 hours of data to save memory/CPU
+          retention: 6h
+          # Disable Persistent Volumes to avoid storage issues
+          persistentVolume:
+            enabled: false
+          # Resource requests for a lean footprint
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+          # Service configuration
+          service:
+            type: ClusterIP
+
+        # Scrape metrics from nodes (CPU, RAM, etc.)
+        nodeExporter:
           enabled: true
-        prometheusOperator:
-          admissionWebhooks:
-            enabled: false
-            patch:
-              enabled: false
-          tls:
-            enabled: false
+
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-      - Validate=false      # מתעלם משגיאות Schema ב-Cache של ArgoCD
-      - Replace=true        # מאפשר החלפת משאבים אם ה-Patch נכשל
-      - SkipDryRunOnMissingResource=true
+      # Skips schema validation during the diff phase to prevent the "field not declared" error
+      - Validate=false
