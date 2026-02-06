@@ -27,9 +27,12 @@ spec:
           enabled: true
           hostNetwork: false
           hostPID: false
+          containerPorts:
+            metrics: 9101
           service:
             type: ClusterIP
-            hostPort: 0 
+            servicePort: 9100
+            targetPort: 9101
 
         alertmanager:
           enabled: false
