@@ -24,7 +24,7 @@ spec:
               memory: "512Mi"
 
         nodeExporter:
-          enabled: true
+          enabled: false
           hostNetwork: false
           hostPID: false
           containerPorts:
