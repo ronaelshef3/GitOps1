@@ -1,22 +1,101 @@
+# Default values for quakewatch-chart.
+command:
+  - "python"
+  - "/app.py"
+
 replicaCount: 1
 
 image:
-  repository: my-app-image
-  pullPolicy: IfNotPresent
-  tag: "latest"
+  repository: aharonshefer03/quakewatch
+  tag: "v0.28"
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "5000"
+  prometheus.io/path: "/metrics"
+
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
 
 service:
-  type: ClusterIP
-  port: 80
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: "/metrics"
-    prometheus.io/port: "80"
+  type: NodePort
+  port: 5000
+  targetPort: 5000
+  nodePort: 30085
 
 ingress:
   enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
 
-# Disable embedded Prometheus dependency to avoid port 9100 conflict
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+    - name: gateway
+      sectionName: http
+  hostnames:
+    - chart-example.local
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /headers
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 5000
+  initialDelaySeconds: 45
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 5000
+  initialDelaySeconds: 45
+  periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# --- Dependency Configuration ---
+# Disable embedded Prometheus components to prevent port 9100 conflicts
 prometheus:
   enabled: false
   server:
@@ -28,7 +107,7 @@ prometheus:
   pushgateway:
     enabled: false
 
-# Disable Redis metrics to avoid sidecar conflicts
+# Disable Redis metrics sidecar if present
 redis:
   metrics:
     enabled: false
