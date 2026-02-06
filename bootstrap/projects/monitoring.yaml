@@ -12,41 +12,22 @@ spec:
     helm:
       values: |
         server:
-          retention: 3h
           persistentVolume:
             enabled: false
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "256Mi"
-            limits:
-              cpu: "300m"
-              memory: "512Mi"
-
         nodeExporter:
           enabled: false
-          hostNetwork: false
-          hostPID: false
-          containerPorts:
-            metrics: 9101
-          service:
-            type: ClusterIP
-            servicePort: 9100
-            targetPort: 9101
-
         alertmanager:
           enabled: false
         pushgateway:
           enabled: false
-
+        kubeStateMetrics:
+          enabled: true
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
-
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - Validate=false
