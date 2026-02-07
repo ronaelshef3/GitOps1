@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: my-app
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
@@ -14,23 +12,7 @@ spec:
     helm:
       valueFiles:
       - values.yaml
-
-      # --- זה החלק שהיה חסר לך! ---
-      # אנחנו דורסים את ההגדרות ומכבים את הפורט 9100 בכוח
-      parameters:
-        - name: prometheus.enabled
-          value: "false"
-        - name: prometheus.server.enabled
-          value: "false"
-        - name: prometheus.alertmanager.enabled
-          value: "false"
-        - name: prometheus.nodeExporter.enabled
-          value: "false"
-        - name: prometheus.pushgateway.enabled
-          value: "false"
-        - name: redis.metrics.enabled
-          value: "false"
-      # ----------------------------
+      # אין כאן parameters! כי אין dependencies לכבות. הכל נקי.
 
   destination:
     server: 'https://kubernetes.default.svc'
@@ -42,4 +24,3 @@ spec:
       selfHeal: true
     syncOptions:
     - CreateNamespace=true
-    - ServerSideApply=true
