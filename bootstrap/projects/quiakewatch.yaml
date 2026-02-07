@@ -1,56 +1,45 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  # The name of the application as it will appear in the ArgoCD UI
   name: my-app
-  # The namespace where this Application resource will be installed (usually 'argocd')
   namespace: argocd
   annotations:
-    # -------------------------------------------------------------------
-    # החלק הקריטי: הגדרת גל סנכרון (Sync Wave)
-    # זה מבטיח ש-ArgoCD ינסה לפרוס את האפליקציה הזו רק אחרי
-    # שכל הפריסות ב-Wave 0 (כמו ה-CRDs) הסתיימו.
     argocd.argoproj.io/sync-wave: "1"
-    # --------------------------------------
 spec:
-  # Which "project" within ArgoCD this application belongs to
   project: default
-
-  # --- Source ---
-  # Where to get the YAML files from
-
   source:
     repoURL: 'https://github.com/ronaelshef3/GitOps1.git'
-    # עדכן את הנתיב לתיקייה הספציפית של ה-Chart
     path: 'app-manifests/quakewatch-chart'
-
     targetRevision: master
-
-    # --- הסעיף החשוב ---
     helm:
-      # ArgoCD יחפש אוטומטית 'my-chart/values.yaml'
       valueFiles:
       - values.yaml
-#      - values-image.yaml
 
-  # --- Destination ---
-  # Where to deploy the application
+      # --- זה החלק שהיה חסר לך! ---
+      # אנחנו דורסים את ההגדרות ומכבים את הפורט 9100 בכוח
+      parameters:
+        - name: prometheus.enabled
+          value: "false"
+        - name: prometheus.server.enabled
+          value: "false"
+        - name: prometheus.alertmanager.enabled
+          value: "false"
+        - name: prometheus.nodeExporter.enabled
+          value: "false"
+        - name: prometheus.pushgateway.enabled
+          value: "false"
+        - name: redis.metrics.enabled
+          value: "false"
+      # ----------------------------
+
   destination:
-    # The Kubernetes cluster API server address
-    # 'https://kubernetes.default.svc' means "the same cluster ArgoCD is running on"
     server: 'https://kubernetes.default.svc'
-    # The namespace in the destination cluster where resources will be deployed
     namespace: my-app-namespace
 
-  # --- Sync Policy ---
   syncPolicy:
     automated:
-      # (Optional) Allows ArgoCD to delete resources that you removed from Git
       prune: true
-      # (Optional) Allows ArgoCD to automatically fix manual changes made in the cluster
       selfHeal: true
-
-    # (Optional) Allows Argo to create the destination namespace if it doesn't exist
     syncOptions:
     - CreateNamespace=true
     - ServerSideApply=true
