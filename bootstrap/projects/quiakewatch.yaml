@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/ronaelshef3/gitops1'
     targetRevision: master
-    path: APP-MANIFAST # התיקייה שבה יושב ה-Helm Chart שלך
+    path: /app-manifests  # התיקייה שבה יושב ה-Helm Chart שלך
     helm:
       valueFiles:
         - values.yaml # שימוש בערכים ששלחת לי קודם
