@@ -11,44 +11,40 @@ spec:
     targetRevision: 61.x.x
     helm:
       values: |
-        # Prometheus - Minimal Configuration
+        # Minimalist settings
         prometheus:
           prometheusSpec:
             replicas: 1
-            scrapeInterval: "30s"
             storageSpec:
               emptyDir:
                 medium: ""
-            resources:
-              requests:
-                cpu: "100m"
-                memory: "256Mi"
-              limits:
-                cpu: "500m"
-                memory: "512Mi"
         
-        # Disable heavy components
+        # Disable Alertmanager & Grafana (Optional: keep Grafana true if needed)
         alertmanager:
           enabled: false
         grafana:
           enabled: true
+
+        # --- התיקון הקריטי לשגיאת ה-Secret ---
+        prometheusOperator:
+          enabled: true
+          admissionWebhooks:
+            enabled: false # מבטל את הצורך ב-Secret tls-secret
+            patch:
+              enabled: false
+          tls:
+            enabled: false
+        
+        # ביטול רכיבים שיוצרים עומס ודורשים Secrets נוספים
         nodeExporter:
           enabled: false
         kubeStateMetrics:
           enabled: false
-          
-        # Webhook fixes for local clusters
-        prometheusOperator:
-          admissionWebhooks:
-            enabled: false
-            patch:
-              enabled: false
 
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
 
-  # --- התיקון לשגיאת ה-Schema וה-Diff ---
   ignoreDifferences:
     - group: ""
       kind: ServiceAccount
@@ -65,6 +61,5 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true # עוקף את מגבלת ה-256KB של ה-CRDs
-      - Validate=false      # מתעלם משגיאות Schema ב-Cache
-      - Replace=true        # מאפשר דריסה נקייה של משאבים תקועים
+      - ServerSideApply=true
+      - Validate=false
