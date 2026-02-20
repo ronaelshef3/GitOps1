@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: slim-monitoring
+  name: ultra-slim-monitoring
   namespace: argocd
 spec:
   project: default
@@ -11,53 +11,50 @@ spec:
     targetRevision: 61.x.x
     helm:
       values: |
-        # 1. ביטול רכיבים שחונקים את ה-CPU (החרא שגרם ל-100% עומס)
-        nodeExporter:
-          enabled: false
-        kubeStateMetrics:
-          enabled: false
-        alertmanager:
-          enabled: false
-
-        # 2. פתרון שגיאת ה-TLS וה-Secret (מה שתקע אותך עכשיו)
+        # פתרון הקונפליקטים: ביטול Webhooks ו-TLS
         prometheusOperator:
-          admissionWebhooks:
-            enabled: false
-            patch:
-              enabled: false
-          tls:
-            enabled: false
-
-        # 3. הגדרות פרומתיאוס - הגבלה קשיחה כדי שלא יאכל את הזיכרון
+          admissionWebhooks: { enabled: false }
+          patch: { enabled: false }
+          tls: { enabled: false }
+        
+        # חיסכון במשאבים (הגנה על ה-Vmmem וה-CPU)
+        nodeExporter: { enabled: false }
+        kubeStateMetrics: { enabled: false }
+        alertmanager: { enabled: false }
+        
         prometheus:
           prometheusSpec:
-            replicas: 1
-            scrapeInterval: "30s" # סריקה פחות אינטנסיבית
+            scrapeInterval: "30s"
             resources:
-              limits:
-                cpu: "200m"
-                memory: "1Gi" # יש לך 34GB, אז 1GB זה כלום בשבילך
-            storageSpec:
-              emptyDir:
-                medium: ""
+              limits: { cpu: "200m", memory: "1Gi" }
+            # הגדרה שמאפשרת לזהות את QuakeWatch אוטומטית לפי Annotations
+            additionalScrapeConfigs:
+              - job_name: 'kubernetes-service-endpoints'
+                kubernetes_sd_configs:
+                  - role: endpoints
+                relabel_configs:
+                  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                    action: keep
+                    regex: true
+                  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                    action: replace
+                    target_label: __metrics_path__
+                    regex: (.+)
+                  - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                    action: replace
+                    target_label: __address__
+                    regex: ([^:]+)(?::\d+)?;(\d+)
+                    replacement: $1:$2
 
-        # 4. גרפאנה קלילה
         grafana:
-          enabled: true
           resources:
-            limits:
-              cpu: "100m"
-              memory: "512Mi"
-
+            limits: { cpu: "100m", memory: "512Mi" }
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
-
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    automated: { prune: true, selfHeal: true }
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true # חובה כדי לעקוף מגבלת גודל YAML
-      - Validate=false        # עוקף את שגיאת ה-field not declared in schema
+      - ServerSideApply=true
+      - Validate=false
