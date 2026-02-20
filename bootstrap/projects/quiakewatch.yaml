@@ -29,6 +29,7 @@ spec:
     # מרחב השמות בו תרוץ האפליקציה
     namespace: my-app-namespace
 
+
   syncPolicy:
     automated:
       prune: true
