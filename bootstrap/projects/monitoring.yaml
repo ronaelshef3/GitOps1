@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring-stack
+  name: slim-monitoring
   namespace: argocd
 spec:
   project: default
@@ -11,50 +11,22 @@ spec:
     targetRevision: 61.x.x
     helm:
       values: |
-        # Minimalist settings
-        prometheus:
-          prometheusSpec:
-            replicas: 1
-            storageSpec:
-              emptyDir:
-                medium: ""
-        
-        # Disable Alertmanager & Grafana (Optional: keep Grafana true if needed)
+        prometheusOperator:
+          admissionWebhooks:
+            enabled: false
+        nodeExporter:
+          enabled: false # זה יציל לך את ה-CPU
         alertmanager:
           enabled: false
-        grafana:
-          enabled: true
-
-        # --- התיקון הקריטי לשגיאת ה-Secret ---
-        prometheusOperator:
-          enabled: true
-          admissionWebhooks:
-            enabled: false # מבטל את הצורך ב-Secret tls-secret
-            patch:
-              enabled: false
-          tls:
-            enabled: false
-        
-        # ביטול רכיבים שיוצרים עומס ודורשים Secrets נוספים
-        nodeExporter:
-          enabled: false
-        kubeStateMetrics:
-          enabled: false
-
+        prometheus:
+          prometheusSpec:
+            resources:
+              limits:
+                cpu: 200m
+                memory: 1Gi
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
-
-  ignoreDifferences:
-    - group: ""
-      kind: ServiceAccount
-      jsonPointers:
-        - /automountServiceAccountToken
-    - group: monitoring.coreos.com
-      kind: Prometheus
-      jsonPointers:
-        - /spec/automountServiceAccountToken
-
   syncPolicy:
     automated:
       prune: true
@@ -62,4 +34,3 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-      - Validate=false
