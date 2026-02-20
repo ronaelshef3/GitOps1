@@ -11,39 +11,60 @@ spec:
     targetRevision: 61.x.x
     helm:
       values: |
-        # גרסה רזה מאוד ללוקאל
+        # Prometheus - Minimal Configuration
         prometheus:
           prometheusSpec:
-            scrapeInterval: "30s"
             replicas: 1
+            scrapeInterval: "30s"
             storageSpec:
               emptyDir:
                 medium: ""
             resources:
               requests:
                 cpu: "100m"
-                memory: "256Mi" # צמצום זיכרון
+                memory: "256Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
+        
+        # Disable heavy components
         alertmanager:
-          enabled: false # לא צריך התראות במחשב האישי
+          enabled: false
         grafana:
-          enabled: true # גרפנה נשארת כדי לראות ויזואלית
+          enabled: true
+        nodeExporter:
+          enabled: false
+        kubeStateMetrics:
+          enabled: false
+          
+        # Webhook fixes for local clusters
         prometheusOperator:
           admissionWebhooks:
             enabled: false
             patch:
               enabled: false
-        # ביטול רכיבים כבדים שרצים על כל ה-Nodes
-        nodeExporter:
-          enabled: false
-        kubeStateMetrics:
-          enabled: false
+
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
+
+  # --- התיקון לשגיאת ה-Schema וה-Diff ---
+  ignoreDifferences:
+    - group: ""
+      kind: ServiceAccount
+      jsonPointers:
+        - /automountServiceAccountToken
+    - group: monitoring.coreos.com
+      kind: Prometheus
+      jsonPointers:
+        - /spec/automountServiceAccountToken
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true # פותר את בעיית ה-CRD הגדול
+      - ServerSideApply=true # עוקף את מגבלת ה-256KB של ה-CRDs
+      - Validate=false      # מתעלם משגיאות Schema ב-Cache
+      - Replace=true        # מאפשר דריסה נקייה של משאבים תקועים
