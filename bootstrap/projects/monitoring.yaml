@@ -11,26 +11,53 @@ spec:
     targetRevision: 61.x.x
     helm:
       values: |
+        # 1. ביטול רכיבים שחונקים את ה-CPU (החרא שגרם ל-100% עומס)
+        nodeExporter:
+          enabled: false
+        kubeStateMetrics:
+          enabled: false
+        alertmanager:
+          enabled: false
+
+        # 2. פתרון שגיאת ה-TLS וה-Secret (מה שתקע אותך עכשיו)
         prometheusOperator:
           admissionWebhooks:
             enabled: false
-        nodeExporter:
-          enabled: false # זה יציל לך את ה-CPU
-        alertmanager:
-          enabled: false
+            patch:
+              enabled: false
+          tls:
+            enabled: false
+
+        # 3. הגדרות פרומתיאוס - הגבלה קשיחה כדי שלא יאכל את הזיכרון
         prometheus:
           prometheusSpec:
+            replicas: 1
+            scrapeInterval: "30s" # סריקה פחות אינטנסיבית
             resources:
               limits:
-                cpu: 200m
-                memory: 1Gi
+                cpu: "200m"
+                memory: "1Gi" # יש לך 34GB, אז 1GB זה כלום בשבילך
+            storageSpec:
+              emptyDir:
+                medium: ""
+
+        # 4. גרפאנה קלילה
+        grafana:
+          enabled: true
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "512Mi"
+
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - ServerSideApply=true # חובה כדי לעקוף מגבלת גודל YAML
+      - Validate=false        # עוקף את שגיאת ה-field not declared in schema
