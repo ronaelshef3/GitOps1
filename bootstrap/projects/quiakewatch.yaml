@@ -1,21 +1,32 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: my-app
+  name: quakewatch-app
   namespace: argocd
+  annotations:
+    # מבטיח שהאפליקציה תעלה רק אחרי שהתשתית (Prometheus) מוכנה
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   project: default
+
   source:
+    # הגיט שלך
     repoURL: 'https://github.com/ronaelshef3/GitOps1.git'
+    # נתיב לתיקיית ה-Chart של האפליקציה
     path: 'app-manifests/quakewatch-chart'
     targetRevision: master
+
     helm:
+      # טעינת קובץ ה-values מהגיט
       valueFiles:
-      - values.yaml
-      # אין כאן parameters! כי אין dependencies לכבות. הכל נקי.
+        - values.yaml
+      # כאן אפשר להוסיף דריסות ספציפיות אם צריך
+      values: |
+        replicaCount: 1
 
   destination:
     server: 'https://kubernetes.default.svc'
+    # מרחב השמות בו תרוץ האפליקציה
     namespace: my-app-namespace
 
   syncPolicy:
@@ -23,4 +34,7 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
+      - ServerSideApply=true
+      # מאפשר לארגו להמשיך גם אם יש אובייקטים קטנים שחסרים ב-DryRun
+      - SkipDryRunOnMissingResource=true

@@ -1,27 +1,42 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: universal-monitoring
+  name: monitoring-stack
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://prometheus-community.github.io/helm-charts'
-    chart: prometheus
-    targetRevision: 25.x.x
+    chart: kube-prometheus-stack
+    targetRevision: 61.x.x
     helm:
       values: |
-        server:
-          persistentVolume:
+        # גרסה רזה מאוד ללוקאל
+        prometheus:
+          prometheusSpec:
+            scrapeInterval: "30s"
+            replicas: 1
+            storageSpec:
+              emptyDir:
+                medium: ""
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "256Mi" # צמצום זיכרון
+        alertmanager:
+          enabled: false # לא צריך התראות במחשב האישי
+        grafana:
+          enabled: true # גרפנה נשארת כדי לראות ויזואלית
+        prometheusOperator:
+          admissionWebhooks:
             enabled: false
+            patch:
+              enabled: false
+        # ביטול רכיבים כבדים שרצים על כל ה-Nodes
         nodeExporter:
           enabled: false
-        alertmanager:
-          enabled: false
-        pushgateway:
-          enabled: false
         kubeStateMetrics:
-          enabled: true
+          enabled: false
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
@@ -31,3 +46,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true # פותר את בעיית ה-CRD הגדול
