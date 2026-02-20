@@ -1,42 +1,24 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: quakewatch
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: quakewatch
-  template:
-    metadata:
-      labels:
-        app: quakewatch
-    spec:
-      containers:
-      - name: quakewatch
-        image: your-image-repo/quakewatch:latest # <--- תחליפי לתמונה שלך ב-DockerHub/ECR
-        ports:
-        - containerPort: 8080
-        resources:
-          limits:
-            cpu: "100m"
-            memory: "256Mi"
----
-apiVersion: v1
-kind: Service
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: quakewatch-service
-  namespace: default
-  annotations:
-    # כאן החיבור לניטור - פשוט ונקי
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "8080"
-    prometheus.io/path: "/metrics"
+  namespace: argocd
 spec:
-  selector:
-    app: quakewatch
-  ports:
-  - port: 80
-    targetPort: 8080
-    name: http
+  project: default
+  source:
+    repoURL: 'https://github.com/ronaelshef3/gitops1'
+    targetRevision: master
+    path: APP-MANIFAST # התיקייה שבה יושב ה-Helm Chart שלך
+    helm:
+      valueFiles:
+        - values.yaml # שימוש בערכים ששלחת לי קודם
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default # האפליקציה תרוץ ב-Namespace הרגיל
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true # עוזר לעקוף שגיאות Schema
