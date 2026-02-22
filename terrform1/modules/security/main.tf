@@ -54,6 +54,29 @@ resource "aws_security_group" "k3s_sg" {
     protocol  = "-1"
     self      = true
   }
+# 2. Grafana - לוחות בקרה
+  ingress {
+    from_port   = 30001
+    to_port     = 30001
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # 3. Prometheus - ממשק המטריקות
+  ingress {
+    from_port   = 30002
+    to_port     = 30002
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # 4. QuakeWatch - האפליקציה שלך
+  ingress {
+    from_port   = 30085
+    to_port     = 30085
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   # ---(Egress) ---
 
