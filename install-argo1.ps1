@@ -48,7 +48,7 @@ ssh -i $SSH_KEY -t $REMOTE "chmod +x /tmp/install-argo.sh && sudo /tmp/install-a
 Write-Host "`n=== STEP 5: Deploying Root App from Git Reference ===" -ForegroundColor Cyan
 # במקום לייצר YAML, אנחנו פשוט אומרים לקיוב להחיל את הקובץ שקיים בתיקיית ה-bootstrap בגיט
 # אנחנו משתמשים בנתיב ה-Raw של גיטהאב כדי שהשרת יוכל למשוך אותו ישירות
-$ROOT_APP_URL = "https://raw.githubusercontent.com/ronaelshef3/GitOps1/master/bootstrap/root-app.yaml"
+$ROOT_APP_URL = "https://raw.githubusercontent.com/ronaelshef3/GitOps1/main/bootstrap/root-app.yaml"
 
 ssh -i $SSH_KEY -t $REMOTE "kubectl apply -f $ROOT_APP_URL"
 
